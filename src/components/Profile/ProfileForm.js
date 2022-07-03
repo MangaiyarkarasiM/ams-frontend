@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -134,6 +134,11 @@ const ProfileForm = (props) => {
             <small className="text-danger">{errors.organizationName}</small>
           )}
         </div>
+        {props.message && (
+          <div className="mb-4">
+            <small className="text-danger">{props.message}</small>
+          </div>
+        )}
         <div className="border-top mb-2"></div>
         <div className="d-flex justify-content-start align-items-center">
           <button

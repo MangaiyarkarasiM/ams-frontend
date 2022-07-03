@@ -108,6 +108,7 @@ const ProfilePage = () => {
         }}
       >
         <ProfileForm
+          message={message}
           user={user}
           setShowModal={setShowModal}
           onEditProfile={onEditProfile}

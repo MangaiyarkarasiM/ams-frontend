@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import Modal from "../components/Modal/Modal";
-import fetchApi from "../utils/fetchApi";
 import LocationForm from "../components/Location/LocationForm";
 import { GlobalContext } from "../context/globalContext";
 
 const LocationPage = () => {
-  const { userName, locations, getAllLocations, showModal, setShowModal, onAddLocation, onDeleteLocation } = useContext(GlobalContext);
-  const [message, setMessage] = useState("");
+  const { locations, getAllLocations, showModal, setShowModal, onAddLocation, onDeleteLocation, message } = useContext(GlobalContext);
   let n = 1;
 
   useEffect(() => {
