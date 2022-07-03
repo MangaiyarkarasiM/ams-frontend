@@ -1,0 +1,8 @@
+.footer-item:hover{
+    color: white;
+    text-decoration: none;
+}
+
+.footer-item{
+    color: rgb(205, 202, 202)
+}

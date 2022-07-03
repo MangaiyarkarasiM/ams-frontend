@@ -1,38 +1,73 @@
-.App {
-  text-align: center;
+.logincard{
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.formcontrol{
+    width: 75%;
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    margin-left: 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+@media (min-width:200px) and (max-width:768px){
+    
+    .forminput{
+        flex-direction: column;
+    }
+    .forminput>label{
+        margin-bottom: 0.5rem;
+    }
+    
+    }
+
+@media (min-width:768px){
+    .navbar-toggler-icon{
+        display: none;
+        visibility: hidden;
+    }
+    .navbtn{
+        display: none;
+        visibility: hidden;
+    }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+input::-webkit-input-placeholder { 
+    font-style: italic;
+}
+/*firefox 19+ versions*/
+input::-moz-placeholder {
+    font-style: italic;
+}
+/*IE  versions*/
+input::-ms-placeholder {
+    font-style: italic;
 }
 
-.App-link {
-  color: #61dafb;
+input::placeholder {
+    font-style: italic;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.tablelink{
+    text-decoration: underline;
+}
+
+.tablelink:hover{
+    font-weight: bold;
+}
+
+.profile-card{
+    margin-left: 15%;
+    margin-right: 15%;
 }
