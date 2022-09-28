@@ -3,14 +3,22 @@ import fetchApi from "../utils/fetchApi";
 import { GlobalContext } from "../context/globalContext";
 
 const RecoverPage = () => {
-  const { userName } = useContext(GlobalContext);
+  const { userName, onAuthFail } = useContext(GlobalContext);
   const [disposedAssets, setDisposedAssets] = useState([]);
   let n = 1;
 
   async function getAllAssets() {
-    let res = await fetchApi.get(`/assets/getAllAssets`);
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/assets/getAllAssets`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
     //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       let disposedAssets = res.data.assets.filter((a) => {
         return a.status === "Disposed";
       });
@@ -34,9 +42,17 @@ const RecoverPage = () => {
       });
       asset.status = "Available";
       asset.lastUpdatedBy = userName;
-      let res = await fetchApi.put(`assets/${id}`, asset);
-      //console.log(values);
-      if (res.data.statusCode === 200) {
+      let token = sessionStorage.getItem("token");
+      let res = await fetchApi.put(`assets/${id}`, asset, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      //console.log(res.data);
+      if (res.data.statusCode === 401) {
+        onAuthFail();
+      } else if (res.data.statusCode === 200) {
         alert("Asset successfully recovered");
         getAllAssets();
       } else {

@@ -56,10 +56,23 @@ function App() {
     }
   };
 
+  const onAuthFail = () => {
+    window.alert("Your session has ended. Please login again to authenticate");
+    navigate("/login");
+  };
+
   async function getAllAssets() {
-    let res = await fetchApi.get(`/assets/getAllAssets`);
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/assets/getAllAssets`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
     //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       let assets = res.data.assets.filter((a) => {
         return a.status !== "Disposed";
       });
@@ -70,9 +83,18 @@ function App() {
   }
 
   async function getAllLocations() {
-    let res = await fetchApi.get(`/sites/getAllSites`);
     //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/sites/getAllSites`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    //console.log(res.data);
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setLocations(res.data.sites);
     } else {
       console.log(res.data);
@@ -81,9 +103,17 @@ function App() {
 
   const onAddAsset = async (value) => {
     let asset = { ...value, lastUpdatedBy: userName };
-    let res = await fetchApi.post(`/assets/create`, asset);
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.post(`/assets/create`, asset, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
     //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setShowModal(false);
       setMessage("");
       getAllAssets();
@@ -95,9 +125,17 @@ function App() {
 
   const onEditAsset = async (values, asset) => {
     let ast = { ...values, lastUpdatedBy: userName };
-    let res = await fetchApi.put(`assets/${asset._id}`, ast);
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.put(`assets/${asset._id}`, ast, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
     //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       alert(res.data.message);
       navigate("/assets");
     } else {
@@ -107,9 +145,17 @@ function App() {
 
   const onAddLocation = async (value) => {
     let location = { ...value, changedBy: userName };
-    let res = await fetchApi.post(`/sites/create`, location);
-    console.log(res);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.post(`/sites/create`, location, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    //console.log(res.data);
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setShowModal(false);
       getAllLocations();
     } else {
@@ -124,9 +170,17 @@ function App() {
       \nPress ok to proceed with the deletion of ${address}.\nPress cancel to revisit the assets and users.`
     );
     if (conf) {
-      let res = await fetchApi.delete(`sites/${id}`);
-      //console.log(values);
-      if (res.data.statusCode === 200) {
+      let token = sessionStorage.getItem("token");
+      let res = await fetchApi.delete(`sites/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      //console.log(res.data);
+      if (res.data.statusCode === 401) {
+        onAuthFail();
+      } else if (res.data.statusCode === 200) {
         alert(res.data.message);
         getAllLocations();
       } else {
@@ -151,6 +205,7 @@ function App() {
         onEditAsset,
         onAddLocation,
         onDeleteLocation,
+        onAuthFail,
       }}
     >
       <div className="d-flex flex-row">

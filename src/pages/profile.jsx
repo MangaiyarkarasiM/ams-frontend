@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import fetchApi from "../utils/fetchApi";
 import ProfileForm from "../components/Profile/ProfileForm";
 import Modal from "../components/Modal/Modal";
+import { GlobalContext } from "../context/globalContext";
 
 const ProfilePage = () => {
+  const { onAuthFail } = useContext(GlobalContext);
   let { id } = useParams();
   const [user, setUser] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
 
   async function getUserById() {
-    let res = await fetchApi.get(`/users/${id}`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/users/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setUser(res.data.user);
     } else {
       console.log(res.data);
@@ -26,8 +35,16 @@ const ProfilePage = () => {
 
   const onEditProfile = async (value) => {
     //console.log(value);
-    let res = await fetchApi.put(`/users/${user._id}`, value);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.put(`/users/${user._id}`, value, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setMessage("");
       setShowModal(false);
       getUserById();
@@ -43,7 +60,7 @@ const ProfilePage = () => {
         <div className="row">
           <div className="col-sm-12 col-md-12 col-lg-12 col-xl-12">
             <div className="d-flex justify-content-between align-items-center">
-              <p>Hello {id}</p>
+              <p>Hello <sapn className="text-capitalize">{id}</sapn>!</p>
               <button
                 className="btn btn-warning"
                 onClick={() => {

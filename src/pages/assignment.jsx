@@ -5,7 +5,8 @@ import fetchApi from "../utils/fetchApi";
 import { GlobalContext } from "../context/globalContext";
 
 const AssignmentPage = () => {
-  const { userName, getAllLocations, locations } = useContext(GlobalContext);
+  const { userName, getAllLocations, locations, onAuthFail } =
+    useContext(GlobalContext);
   const [message, setMessage] = useState("");
   const [assets, setAssets] = useState([]);
   const [users, setUsers] = useState([]);
@@ -14,9 +15,16 @@ const AssignmentPage = () => {
   let n = 1;
 
   async function getAllAssets() {
-    let res = await fetchApi.get(`/assets/getAllAssets`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/assets/getAllAssets`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       let assets = res.data.assets.filter((a) => {
         return a.status === "Available" && a.assetType === "Electronic item";
       });
@@ -27,9 +35,16 @@ const AssignmentPage = () => {
   }
 
   async function getAllUsers() {
-    let res = await fetchApi.get(`/users/getAllUsers`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/users/getAllUsers`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setUsers(res.data.users);
     } else {
       console.log(res.data);
@@ -52,18 +67,39 @@ const AssignmentPage = () => {
     if (asset.location === loc[0]) {
       setMessage("");
       let updatedUser = { ...user, location: loc, asset: ast };
-      let resUser = await fetchApi.put(`/users/${user._id}`, updatedUser);
-      if (resUser.data.statusCode === 200) {
+      let token = sessionStorage.getItem("token");
+      let resUser = await fetchApi.put(`/users/${user._id}`, updatedUser, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (resUser.data.statusCode === 401) {
+        onAuthFail();
+      } else if (resUser.data.statusCode === 200) {
         asset.status = "Assigned";
         asset.assignedUser = value.userName;
-        let resAsset = await fetchApi.put(`/assets/${asset._id}`, asset);
-        if (resAsset.data.statusCode === 200) {
+        let resAsset = await fetchApi.put(`/assets/${asset._id}`, asset, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (resAsset.data.statusCode === 401) {
+          onAuthFail();
+        } else if (resAsset.data.statusCode === 200) {
           setShowModal(false);
           getAllUsers();
           setUser({});
           alert("Asset and location update successful.");
         } else {
-          let r = await fetchApi.put(`/users/${user._id}`, user);
+          let r = await fetchApi.put(`/users/${user._id}`, user, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
           console.log(resUser.data.error);
           alert("Update has been failed. Please try again later");
         }
@@ -88,26 +124,58 @@ const AssignmentPage = () => {
     let assetId = user.asset[0];
     user.asset = [];
     //console.log(u,assetId)
-    let resUser = await fetchApi.put(`/users/${user._id}`, user);
-    if (resUser.data.statusCode === 200) {
-      let res = await fetchApi.get(`/assets/id/${assetId}`);
-      if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let resUser = await fetchApi.put(`/users/${user._id}`, user, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (resUser.data.statusCode === 401) {
+      onAuthFail();
+    } else if (resUser.data.statusCode === 200) {
+      let res = await fetchApi.get(`/assets/id/${assetId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.data.statusCode === 401) {
+        onAuthFail();
+      } else if (res.data.statusCode === 200) {
         let asset = res.data.asset;
         asset.status = "Available";
         asset.assignedUser = "";
-        let resAsset = await fetchApi.put(`/assets/${asset._id}`, asset);
-        if (resAsset.data.statusCode === 200) {
+        let resAsset = await fetchApi.put(`/assets/${asset._id}`, asset, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        if (resAsset.data.statusCode === 401) {
+          onAuthFail();
+        } else if (resAsset.data.statusCode === 200) {
           getAllUsers();
           getAllAssets();
           getAllLocations();
           alert("Asset has been unassigned from the user");
         } else {
-          let resUser = await fetchApi.put(`/users/${user._id}`, u);
+          let resUser = await fetchApi.put(`/users/${user._id}`, u, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
           console.log(resAsset.data);
           alert("Update failed. Please try again later");
         }
       } else {
-        let resUser = await fetchApi.put(`/users/${user._id}`, u);
+        let resUser = await fetchApi.put(`/users/${user._id}`, u, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
         console.log(res.data);
         alert("Update failed. Please try again later");
       }
@@ -171,6 +239,7 @@ const AssignmentPage = () => {
                             onClick={() => {
                               onUnassign(user);
                             }}
+                            disabled={user.asset?.length === 0 ? true : ''}
                           >
                             Unassign
                           </button>

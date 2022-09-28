@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Card from "../components/Card/Card";
 import fetchApi from "../utils/fetchApi";
+import { GlobalContext } from "../context/globalContext";
 import { Line } from "react-chartjs-2";
 import { Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 Chart.register(...registerables);
 
 const DashboardPage = () => {
+  const { onAuthFail } = useContext(GlobalContext);
   const [assets, setAssets] = useState([]);
   const [barData, setBarData] = useState([]);
   const [lineData, setLineData] = useState([]);
@@ -66,6 +68,7 @@ const DashboardPage = () => {
     scales: {
       y: {
         beginAtZero: true,
+        suggestedMax: 10
       },
     },
   };
@@ -81,6 +84,12 @@ const DashboardPage = () => {
         text: 'Assets Repaired Per Month',
       },
     },
+    scales:{
+      y: {
+        beginAtZero: true,
+        suggestedMax: 10
+      },
+    },
     elements: {
       point: {
         backgroundColor: "#6c757d",
@@ -89,9 +98,16 @@ const DashboardPage = () => {
   };
 
   async function getAllAssets() {
-    let res = await fetchApi.get(`/assets/getAllAssets`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/assets/getAllAssets`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setAssets(res.data.assets);
       calculateData(res.data.assets, false);
     } else {
@@ -100,9 +116,16 @@ const DashboardPage = () => {
   }
 
   async function getAllMaintenances() {
-    let res = await fetchApi.get(`/maintenances/getAllMaintenanceDetails`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/maintenances/getAllMaintenanceDetails`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       calculateData(
         res.data.maintenances.filter((m) => {
           return m.status === "Complete";

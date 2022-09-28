@@ -3,14 +3,22 @@ import fetchApi from "../utils/fetchApi";
 import { GlobalContext } from "../context/globalContext";
 
 const DisposePage = () => {
-  const { userName } = useContext(GlobalContext);
+  const { userName, onAuthFail } = useContext(GlobalContext);
   const [unDisposedAssets, setUnDisposedAssets] = useState([]);
   let n = 1;
 
   async function getAllAssets() {
-    let res = await fetchApi.get(`/assets/getAllAssets`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/assets/getAllAssets`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+	
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       let unDisposedAssets = res.data.assets.filter((a) => {
         return a.status !== "Disposed";
       });
@@ -34,9 +42,17 @@ const DisposePage = () => {
       });
       asset.status = "Disposed";
       asset.lastUpdatedBy = userName;
-      let res = await fetchApi.put(`assets/${id}`, asset);
-      //console.log(values);
-      if (res.data.statusCode === 200) {
+      let token = sessionStorage.getItem("token");
+      let res = await fetchApi.put(`assets/${id}`, asset, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+    
+      if (res.data.statusCode === 401) {
+        onAuthFail();
+      } else if (res.data.statusCode === 200) {
         alert("Asset successfully disposed");
         getAllAssets();
       } else {

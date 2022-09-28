@@ -5,15 +5,23 @@ import AssetForm from "../components/Asset/AssetForm";
 import { GlobalContext } from "../context/globalContext";
 
 const AssetEditPage = () => {
-  const { onEditAsset, locations } = useContext(GlobalContext);
+  const { onEditAsset, locations, onAuthFail } = useContext(GlobalContext);
   let { serialNumber } = useParams();
   let [asset, setAsset] = useState({});
   const navigate = useNavigate();
 
   async function getAssetWithSerialNumber(serialNumber) {
-    //console.log(serialNumber);
-    let res = await fetchApi.get(`assets/${serialNumber}`);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`assets/${serialNumber}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+	
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       setAsset(res.data.asset);
     } else {
       console.log(res.data);

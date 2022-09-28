@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import fetchApi from "../../utils/fetchApi";
+import { GlobalContext } from "../../context/globalContext";
 
 const maintenanceFormValidation = Yup.object().shape({
   assetSerialNumber: Yup.string().required("Select asset serial number"),
@@ -9,12 +10,20 @@ const maintenanceFormValidation = Yup.object().shape({
 });
 
 const MaintenanceForm = (props) => {
+  const { onAuthFail } = useContext(GlobalContext);
   const [assets, setAssets] = useState([]);
 
   async function getAllAssets() {
-    let res = await fetchApi.get(`/assets/getAllAssets`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/assets/getAllAssets`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       let assets = res.data.assets.filter((a) => {
         return a.status === "Available";
       });

@@ -5,15 +5,22 @@ import fetchApi from "../utils/fetchApi";
 import { GlobalContext } from "../context/globalContext";
 
 const MaintenancePage = () => {
-  const { userName } = useContext(GlobalContext);
+  const { userName, onAuthFail } = useContext(GlobalContext);
   const [maintenances, setMaintenances] = useState([]);
   const [showModal, setShowModal] = useState(false);
   let n = 1;
 
   async function getAllMaintenances() {
-    let res = await fetchApi.get(`/maintenances/getAllMaintenanceDetails`);
-    //console.log(res.data);
-    if (res.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let res = await fetchApi.get(`/maintenances/getAllMaintenanceDetails`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.data.statusCode === 401) {
+      onAuthFail();
+    } else if (res.data.statusCode === 200) {
       let main = res.data.maintenances;
       setMaintenances(main);
     } else {
@@ -27,24 +34,54 @@ const MaintenancePage = () => {
 
   const onAddMaintenance = async (value) => {
     let main = { ...value, status: "In progress", changedBy: userName };
-    let resMain = await fetchApi.post(`/maintenances/create`, main);
-    if (resMain.data.statusCode === 200) {
+    let token = sessionStorage.getItem("token");
+    let resMain = await fetchApi.post(`/maintenances/create`, main, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (resMain.data.statusCode === 401) {
+      onAuthFail();
+    } else if (resMain.data.statusCode === 200) {
       setShowModal(false);
       //after adding the maintenance for an asset, need to update the asset status to Under Maintenance
-      let resAsset = await fetchApi.get(`/assets/${value.assetSerialNumber}`);
-      if (resAsset.data.statusCode === 200) {
+      let resAsset = await fetchApi.get(`/assets/${value.assetSerialNumber}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (resAsset.data.statusCode === 401) {
+        onAuthFail();
+      } else if (resAsset.data.statusCode === 200) {
         let asset = resAsset.data.asset;
         if (asset) {
           asset.status = "Under Maintenance";
           let resAssetUpdate = await fetchApi.put(
             `/assets/${asset._id}`,
-            asset
+            asset,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
           );
-          if (resAssetUpdate.data.statusCode === 200) {
+
+          if (resAssetUpdate.data.statusCode === 401) {
+            onAuthFail();
+          } else if (resAssetUpdate.data.statusCode === 200) {
             alert("Maintenance successfully added");
           } else {
             let res = await fetchApi.delete(
-              `/maintenances/${resMain.data.details._id}`
+              `/maintenances/${resMain.data.details._id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
             );
             alert(
               "Failed to add maintenance. Please try again after some time"
@@ -76,23 +113,53 @@ const MaintenancePage = () => {
       main.endTimeStamp = String(Date.now());
       main.status = "Complete";
       //console.log(main);
-      let resMain = await fetchApi.put(`/maintenances/${id}`, main);
-      if (resMain.data.statusCode === 200) {
-        let resAsset = await fetchApi.get(`/assets/${assetSerialNumber}`);
-        if (resAsset.data.statusCode === 200) {
+      let token = sessionStorage.getItem("token");
+      let resMain = await fetchApi.put(`/maintenances/${id}`, main, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (resMain.data.statusCode === 401) {
+        onAuthFail();
+      } else if (resMain.data.statusCode === 200) {
+        let resAsset = await fetchApi.get(`/assets/${assetSerialNumber}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (resAsset.data.statusCode === 401) {
+          onAuthFail();
+        } else if (resAsset.data.statusCode === 200) {
           let asset = resAsset.data.asset;
           if (asset) {
             asset.status = "Available";
             let resAssetUpdate = await fetchApi.put(
               `/assets/${asset._id}`,
-              asset
+              asset,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
             );
-            if (resAssetUpdate.data.statusCode === 200) {
+            if (resAssetUpdate.data.statusCode === 401) {
+              onAuthFail();
+            } else if (resAssetUpdate.data.statusCode === 200) {
               alert("Maintenance successfully updated");
             } else {
               main.endTimeStamp = "";
               main.status = "In Progress";
-              let resMain = await fetchApi.put(`/maintenances/${id}`, main);
+              let resMain = await fetchApi.put(`/maintenances/${id}`, main, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              });
               alert(
                 "Failed to update the maintenance. Please try again after some time"
               );
