@@ -27,7 +27,8 @@ import fetchApi from "./utils/fetchApi";
 const exclusionArray = ["/login", "/signup", "/"];
 
 function App() {
-  let [message, setMessage] = useState("");
+  const [spin, setSpin] = useState(false);
+  const [message, setMessage] = useState("");
   const [userName, setUserName] = useState("");
   const [locations, setLocations] = useState([]);
   const [assets, setAssets] = useState([]);
@@ -37,10 +38,14 @@ function App() {
 
   useEffect(() => {
     let user = sessionStorage.getItem("userName");
-    //console.log("inside app.js ", user);
-    user === null ? navigate("/login") : setUserName(user);
-    getAllAssets();
-    getAllLocations();
+    let token = sessionStorage.getItem("token");
+    if (user === null || token === null) {
+      navigate("/login");
+    } else {
+      setUserName(user);
+      getAllAssets();
+      getAllLocations();
+    }
   }, []);
 
   const onLogin = async (value) => {
@@ -50,6 +55,7 @@ function App() {
       sessionStorage.setItem("token", res.data.token);
       setUserName(res.data.userName);
       setMessage("");
+      setSpin(false);
       navigate("/dashboard");
     } else {
       setMessage(res.data.message);
@@ -206,6 +212,8 @@ function App() {
         onAddLocation,
         onDeleteLocation,
         onAuthFail,
+        spin,
+        setSpin
       }}
     >
       <div className="d-flex flex-row">

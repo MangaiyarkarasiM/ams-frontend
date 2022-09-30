@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import fetchApi from "../utils/fetchApi";
+import { GlobalContext } from "../context/globalContext";
 
 const signupFormValidation = Yup.object().shape({
   userName: Yup.string().required("Enter user name"),
@@ -11,10 +12,11 @@ const signupFormValidation = Yup.object().shape({
   email: Yup.string().email("Enter valid email").required("Enter email"),
   password: Yup.string().required("Enter password").min(8),
   mobile: Yup.string(),
-  organizationName: Yup.string().required("Enter organization name")
+  organizationName: Yup.string().required("Enter organization name"),
 });
 
 function SignupPage(props) {
+  const { spin, setSpin } = useContext(GlobalContext);
   let [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -30,15 +32,26 @@ function SignupPage(props) {
 
   return (
     <div className="my-5 d-flex flex-column">
-      <h3 className="text-dark text-center"><span className="text-warning">assetRef</span> - Create new user</h3>
+      <h3 className="text-dark text-center">
+        <span className="text-warning">assetRef</span> - Create new user
+      </h3>
       <div
         className="mt-3 logincard shadow"
         style={{ width: "50vw", margin: "auto", padding: "0 0 14px 0" }}
       >
         <Formik
-          initialValues={{firstName:'',lastName:'', email:'', mobile:'', password:''}}
-          onSubmit={onSignup}
-          validateOnBlur= {true}
+          initialValues={{
+            firstName: "",
+            lastName: "",
+            email: "",
+            mobile: "",
+            password: "",
+          }}
+          onSubmit={(value) => {
+            setSpin(true);
+            onSignup(value);
+          }}
+          validateOnBlur={true}
           validationSchema={signupFormValidation}
         >
           {() => {
@@ -46,13 +59,15 @@ function SignupPage(props) {
               <Form className="d-flex flex-column px-5 justify-content-center">
                 <div className="mb-4 mt-3">
                   <div className="d-flex">
-                  <label className="d-block font-weight-bold text-secondary w-25">User Name</label>
-                  <Field
-                    name="userName"
-                    type="text"
-                    className="d-block rounded formcontrol"
-                    placeholder="Enter user name"
-                  />
+                    <label className="d-block font-weight-bold text-secondary w-25">
+                      User Name
+                    </label>
+                    <Field
+                      name="userName"
+                      type="text"
+                      className="d-block rounded formcontrol"
+                      placeholder="Enter user name"
+                    />
                   </div>
                   <ErrorMessage
                     name="userName"
@@ -63,13 +78,15 @@ function SignupPage(props) {
                 </div>
                 <div className="mb-4">
                   <div className="d-flex">
-                  <label className="d-block font-weight-bold text-secondary w-25">First Name</label>
-                  <Field
-                    name="firstName"
-                    type="text"
-                    className="d-block rounded formcontrol"
-                    placeholder="Enter your first name"
-                  />
+                    <label className="d-block font-weight-bold text-secondary w-25">
+                      First Name
+                    </label>
+                    <Field
+                      name="firstName"
+                      type="text"
+                      className="d-block rounded formcontrol"
+                      placeholder="Enter your first name"
+                    />
                   </div>
                   <ErrorMessage
                     name="firstName"
@@ -80,13 +97,15 @@ function SignupPage(props) {
                 </div>
                 <div className="mb-4">
                   <div className="d-flex">
-                  <label className="d-block font-weight-bold text-secondary w-25">Last Name</label>
-                  <Field
-                    name="lastName"
-                    type="text"
-                    className="d-block rounded formcontrol"
-                    placeholder="Enter your last name"
-                  />
+                    <label className="d-block font-weight-bold text-secondary w-25">
+                      Last Name
+                    </label>
+                    <Field
+                      name="lastName"
+                      type="text"
+                      className="d-block rounded formcontrol"
+                      placeholder="Enter your last name"
+                    />
                   </div>
                   <ErrorMessage
                     name="lastName"
@@ -97,13 +116,15 @@ function SignupPage(props) {
                 </div>
                 <div className="mb-4">
                   <div className="d-flex">
-                  <label className="d-block font-weight-bold text-secondary w-25">Email</label>
-                  <Field
-                    name="email"
-                    type="email"
-                    className="d-block rounded formcontrol"
-                    placeholder="Enter your email"
-                  />
+                    <label className="d-block font-weight-bold text-secondary w-25">
+                      Email
+                    </label>
+                    <Field
+                      name="email"
+                      type="email"
+                      className="d-block rounded formcontrol"
+                      placeholder="Enter your email"
+                    />
                   </div>
                   <ErrorMessage
                     name="email"
@@ -114,13 +135,15 @@ function SignupPage(props) {
                 </div>
                 <div className="mb-4">
                   <div className="d-flex">
-                  <label className="d-block font-weight-bold text-secondary w-25">Password</label>
-                  <Field
-                    name="password"
-                    type="password"
-                    className="d-block rounded formcontrol"
-                    placeholder="Password"
-                  />
+                    <label className="d-block font-weight-bold text-secondary w-25">
+                      Password
+                    </label>
+                    <Field
+                      name="password"
+                      type="password"
+                      className="d-block rounded formcontrol"
+                      placeholder="Password"
+                    />
                   </div>
                   <ErrorMessage
                     name="password"
@@ -131,13 +154,15 @@ function SignupPage(props) {
                 </div>
                 <div className="mb-4">
                   <div className="d-flex">
-                  <label className="d-block font-weight-bold text-secondary w-25">Mobile</label>
-                  <Field
-                    name="mobile"
-                    type="text"
-                    className="d-block rounded formcontrol"
-                    placeholder="Enter your mobile"
-                  />
+                    <label className="d-block font-weight-bold text-secondary w-25">
+                      Mobile
+                    </label>
+                    <Field
+                      name="mobile"
+                      type="text"
+                      className="d-block rounded formcontrol"
+                      placeholder="Enter your mobile"
+                    />
                   </div>
                   <ErrorMessage
                     name="mobile"
@@ -148,13 +173,15 @@ function SignupPage(props) {
                 </div>
                 <div className="mb-4">
                   <div className="d-flex">
-                  <label className="d-block font-weight-bold text-secondary w-25">Organization Name</label>
-                  <Field
-                    name="organizationName"
-                    type="text"
-                    className="d-block rounded formcontrol"
-                    placeholder="Enter your organization name"
-                  />
+                    <label className="d-block font-weight-bold text-secondary w-25">
+                      Organization Name
+                    </label>
+                    <Field
+                      name="organizationName"
+                      type="text"
+                      className="d-block rounded formcontrol"
+                      placeholder="Enter your organization name"
+                    />
                   </div>
                   <ErrorMessage
                     name="organizationName"
@@ -163,12 +190,27 @@ function SignupPage(props) {
                     )}
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="btn btn-secondary text-warning d-block rounded mb-3"
-                >
-                  Sign up
-                </button>
+                {spin ? (
+                  <button
+                    class="btn btn-secondary text-warning d-block rounded mb-3"
+                    type="button"
+                    disabled
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>{" "}
+                    Processing...
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="btn btn-secondary text-warning d-block rounded mb-3"
+                  >
+                    Sign up
+                  </button>
+                )}
               </Form>
             );
           }}

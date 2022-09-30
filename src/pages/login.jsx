@@ -10,19 +10,24 @@ const loginFormValidation = Yup.object().shape({
 });
 
 function LoginPage(props) {
-  const {onLogin,message} = useContext(GlobalContext);
+  const { onLogin, message, spin, setSpin } = useContext(GlobalContext);
 
   return (
     <div className="my-5 d-flex flex-column">
-      <h3 className="text-dark text-center"><span className="text-warning">assetRef</span> - Login page</h3>
+      <h3 className="text-dark text-center">
+        <span className="text-warning">assetRef</span> - Login page
+      </h3>
       <div
         className="mt-4 logincard shadow"
         style={{ width: "40vw", margin: "auto", padding: "0 0 14px 0" }}
       >
         <Formik
-          initialValues={{userName:'',password:''}}
-          onSubmit={onLogin}
-          validateOnBlur= {true}
+          initialValues={{ userName: "", password: "" }}
+          onSubmit={(value) => {
+            setSpin(true);
+            onLogin(value);
+          }}
+          validateOnBlur={true}
           validationSchema={loginFormValidation}
           className="d-inline-block mt-2"
         >
@@ -30,7 +35,9 @@ function LoginPage(props) {
             return (
               <Form className="d-flex flex-column px-5 justify-content-center border-info rounded">
                 <div className="mb-4">
-                  <label className="d-block mt-3 font-weight-bold text-secondary">User Name</label>
+                  <label className="d-block mt-3 font-weight-bold text-secondary">
+                    User Name
+                  </label>
                   <Field
                     name="userName"
                     type="text"
@@ -45,7 +52,9 @@ function LoginPage(props) {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="d-block font-weight-bold text-secondary">Password</label>
+                  <label className="d-block font-weight-bold text-secondary">
+                    Password
+                  </label>
                   <Field
                     name="password"
                     type="password"
@@ -59,13 +68,27 @@ function LoginPage(props) {
                     )}
                   />
                 </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-secondary text-warning rounded mb-4"
-                >
-                  Log in
-                </button>
+                {spin ? (
+                  <button
+                    class="btn btn-secondary text-warning rounded mb-4"
+                    type="button"
+                    disabled
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>{" "}
+                    Processing...
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="btn btn-secondary text-warning rounded mb-4"
+                  >
+                    Login
+                  </button>
+                )}
               </Form>
             );
           }}
