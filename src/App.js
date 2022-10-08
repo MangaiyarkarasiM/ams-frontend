@@ -58,6 +58,7 @@ function App() {
       setSpin(false);
       navigate("/dashboard");
     } else {
+      setSpin(false);
       setMessage(res.data.message);
     }
   };
