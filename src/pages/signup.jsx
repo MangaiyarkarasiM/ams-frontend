@@ -24,8 +24,10 @@ function SignupPage(props) {
     let res = await fetchApi.post("/users/register", value);
     console.log(res);
     if (res.data.statusCode === 200) {
+      setSpin(false);
       navigate("/login");
     } else {
+      setSpin(false);
       setMessage(res.data.message);
     }
   };
